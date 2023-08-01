@@ -1,11 +1,13 @@
 # vapoursynth-chromanr
+[![Linux](https://github.com/dnjulek/vapoursynth-chromanr/actions/workflows/linux-build.yml/badge.svg)](https://github.com/dnjulek/vapoursynth-chromanr/actions/workflows/linux-build.yml)
+[![Windows](https://github.com/dnjulek/vapoursynth-chromanr/actions/workflows/windows-build.yml/badge.svg)](https://github.com/dnjulek/vapoursynth-chromanr/actions/workflows/windows-build.yml)
 
 FFmpeg's chromanr for VapourSynth.\
 This version is made with zig, if you have an nvidia GPU, check out the [cuda version](https://github.com/dnjulek/vapoursynth-chromanrcuda).
 
 ## Usage
 ```python
-chromanr.CNR(vnode clip[, float thres=4, float threy=20, float threu=20, float threv=20 int sizew=1, int sizeh=1, int stepw=1, int steph=1, int distance=0])
+chromanr.CNR(vnode clip[, float thres=4, float threy=20, float threu=20, float threv=20, int sizew=1, int sizeh=1, int stepw=1, int steph=1, int distance=0])
 ```
 ### Parameters:
 
