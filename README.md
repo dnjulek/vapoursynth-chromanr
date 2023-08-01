@@ -1,6 +1,7 @@
 # vapoursynth-zboxblur
 
-FFmpeg's chromanr for VapourSynth.
+FFmpeg's chromanr for VapourSynth.\
+This version is made with zig, if you have an nvidia GPU, check out the [cuda version](https://github.com/dnjulek/vapoursynth-chromanrcuda).
 
 ## Usage
 ```python
@@ -34,7 +35,9 @@ chromanr.CNR(vnode clip[, float thres=4, float threy=20, float threu=20, float t
     Mostly useful to speed-up filtering, if > 1 it will skip some rows in averaging.\
     Default value is 1. Allowed range is from 1 to 50.
 - distance\
-    It describes how many iteration to perform when executing SLIC.
+    Set distance type used in calculations.\
+    0 (manhattan): Absolute difference.\
+    1 (euclidean): Difference squared.
 ## Building
 Zig ver >= 0.11.0-dev.4333
 
