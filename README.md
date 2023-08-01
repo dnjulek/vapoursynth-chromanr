@@ -1,4 +1,4 @@
-# vapoursynth-zboxblur
+# vapoursynth-chromanr
 
 FFmpeg's chromanr for VapourSynth.\
 This version is made with zig, if you have an nvidia GPU, check out the [cuda version](https://github.com/dnjulek/vapoursynth-chromanrcuda).
