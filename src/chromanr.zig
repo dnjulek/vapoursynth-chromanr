@@ -244,6 +244,18 @@ export fn chromanrCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
         return;
     }
 
+    if (d.stepw > d.sizew) {
+        vsapi.?.mapSetError.?(out, "chromanr: \"stepw\" cannot be bigger than \"sizew\"");
+        vsapi.?.freeNode.?(d.node);
+        return;
+    }
+
+    if (d.steph > d.sizeh) {
+        vsapi.?.mapSetError.?(out, "chromanr: \"steph\" cannot be bigger than \"sizeh\"");
+        vsapi.?.freeNode.?(d.node);
+        return;
+    }
+
     var data: *ChromanrData = allocator.create(ChromanrData) catch unreachable;
     data.* = d;
 
