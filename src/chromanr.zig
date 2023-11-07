@@ -1,16 +1,20 @@
-const c = @cImport({
-    @cInclude("vapoursynth/VapourSynth4.h");
-});
-
 const std = @import("std");
+const vs = @import("vapoursynth").vapoursynth4;
+
 const math = std.math;
+const ar = vs.ActivationReason;
+const rp = vs.RequestPattern;
+const fm = vs.FilterMode;
+const st = vs.SampleType;
+const cf = vs.ColorFamily;
+
 const allocator = std.heap.c_allocator;
 
 const int_process = @import("int_process.zig");
 const helper = @import("helper.zig");
 
 const ChromanrData = struct {
-    node: ?*c.VSNode,
+    node: ?*vs.Node,
     thres: u16,
     thres_y: u16,
     thres_u: u16,
@@ -25,14 +29,14 @@ const ChromanrData = struct {
     psize: u6,
 };
 
-export fn chromanrGetFrame(n: c_int, activationReason: c_int, instanceData: ?*anyopaque, frameData: ?*?*anyopaque, frameCtx: ?*c.VSFrameContext, core: ?*c.VSCore, vsapi: ?*const c.VSAPI) callconv(.C) ?*const c.VSFrame {
-    _ = frameData;
-    var d: *ChromanrData = @ptrCast(@alignCast(instanceData));
+export fn chromanrGetFrame(n: c_int, activation_reason: ar, instance_data: ?*anyopaque, frame_data: ?*?*anyopaque, frame_ctx: ?*vs.FrameContext, core: ?*vs.Core, vsapi: ?*const vs.API) callconv(.C) ?*const vs.Frame {
+    _ = frame_data;
+    var d: *ChromanrData = @ptrCast(@alignCast(instance_data));
 
-    if (activationReason == c.arInitial) {
-        vsapi.?.requestFrameFilter.?(n, d.node, frameCtx);
-    } else if (activationReason == c.arAllFramesReady) {
-        const src = vsapi.?.getFrameFilter.?(n, d.node, frameCtx);
+    if (activation_reason == ar.Initial) {
+        vsapi.?.requestFrameFilter.?(n, d.node, frame_ctx);
+    } else if (activation_reason == ar.AllFramesReady) {
+        const src = vsapi.?.getFrameFilter.?(n, d.node, frame_ctx);
         var dst = vsapi.?.newVideoFrame.?(vsapi.?.getVideoFrameFormat.?(src), vsapi.?.getFrameWidth.?(src, 0), vsapi.?.getFrameHeight.?(src, 0), src, core);
         var srcpy: [*]const u8 = vsapi.?.getReadPtr.?(src, 0);
         var srcpu: [*]const u8 = vsapi.?.getReadPtr.?(src, 1);
@@ -119,15 +123,15 @@ export fn chromanrGetFrame(n: c_int, activationReason: c_int, instanceData: ?*an
     return null;
 }
 
-export fn chromanrFree(instanceData: ?*anyopaque, core: ?*c.VSCore, vsapi: ?*const c.VSAPI) callconv(.C) void {
+export fn chromanrFree(instance_data: ?*anyopaque, core: ?*vs.Core, vsapi: ?*const vs.API) callconv(.C) void {
     _ = core;
-    var d: *ChromanrData = @ptrCast(@alignCast(instanceData));
+    var d: *ChromanrData = @ptrCast(@alignCast(instance_data));
     vsapi.?.freeNode.?(d.node);
     allocator.destroy(d);
 }
 
-export fn chromanrCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopaque, core: ?*c.VSCore, vsapi: ?*const c.VSAPI) callconv(.C) void {
-    _ = userData;
+export fn chromanrCreate(in: ?*const vs.Map, out: ?*vs.Map, user_data: ?*anyopaque, core: ?*vs.Core, vsapi: ?*const vs.API) callconv(.C) void {
+    _ = user_data;
     var d: ChromanrData = undefined;
     var err: c_int = undefined;
     var _thres: f32 = undefined;
@@ -139,27 +143,27 @@ export fn chromanrCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
     var _stepw: i64 = undefined;
     var _steph: i64 = undefined;
 
-    d.node = vsapi.?.mapGetNode.?(in, "clip", 0, 0).?;
-    const vi: *const c.VSVideoInfo = vsapi.?.getVideoInfo.?(d.node);
+    d.node = vsapi.?.mapGetNode.?(in, "clip", 0, &err).?;
+    const vi: *const vs.VideoInfo = vsapi.?.getVideoInfo.?(d.node);
     d.chroma_ssw = @intCast(vi.format.subSamplingW);
     d.chroma_ssh = @intCast(vi.format.subSamplingH);
 
-    _thres = helper.floatSaturateCast(f32, vsapi.?.mapGetFloat.?(in, "thres", 0, &err));
+    _thres = math.lossyCast(f32, vsapi.?.mapGetFloat.?(in, "thres", 0, &err));
     if (err != 0) {
         _thres = 4.0;
     }
 
-    _threy = helper.floatSaturateCast(f32, vsapi.?.mapGetFloat.?(in, "threy", 0, &err));
+    _threy = math.lossyCast(f32, vsapi.?.mapGetFloat.?(in, "threy", 0, &err));
     if (err != 0) {
         _threy = 20.0;
     }
 
-    _threu = helper.floatSaturateCast(f32, vsapi.?.mapGetFloat.?(in, "threu", 0, &err));
+    _threu = math.lossyCast(f32, vsapi.?.mapGetFloat.?(in, "threu", 0, &err));
     if (err != 0) {
         _threu = 20.0;
     }
 
-    _threv = helper.floatSaturateCast(f32, vsapi.?.mapGetFloat.?(in, "threv", 0, &err));
+    _threv = math.lossyCast(f32, vsapi.?.mapGetFloat.?(in, "threv", 0, &err));
     if (err != 0) {
         _threv = 20.0;
     }
@@ -168,28 +172,28 @@ export fn chromanrCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
     if (err != 0) {
         d.sizew = 3;
     } else {
-        d.sizew = helper.intSaturateCast(usize, _sizew);
+        d.sizew = math.lossyCast(usize, _sizew);
     }
 
     _sizeh = vsapi.?.mapGetInt.?(in, "sizeh", 0, &err);
     if (err != 0) {
         d.sizeh = 3;
     } else {
-        d.sizeh = helper.intSaturateCast(usize, _sizeh);
+        d.sizeh = math.lossyCast(usize, _sizeh);
     }
 
     _stepw = vsapi.?.mapGetInt.?(in, "stepw", 0, &err);
     if (err != 0) {
         d.stepw = 1;
     } else {
-        d.stepw = helper.intSaturateCast(usize, _stepw);
+        d.stepw = math.lossyCast(usize, _stepw);
     }
 
     _steph = vsapi.?.mapGetInt.?(in, "steph", 0, &err);
     if (err != 0) {
         d.steph = 1;
     } else {
-        d.steph = helper.intSaturateCast(usize, _steph);
+        d.steph = math.lossyCast(usize, _steph);
     }
 
     var distance = vsapi.?.mapGetInt.?(in, "distance", 0, &err);
@@ -199,20 +203,20 @@ export fn chromanrCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
     }
 
     d.psize = @as(u6, @intCast(vi.format.bytesPerSample));
-    const depth: u5 = helper.intSaturateCast(u5, vi.format.bitsPerSample - 8);
+    const depth: u5 = math.lossyCast(u5, vi.format.bitsPerSample - 8);
     const scal: f32 = @floatFromInt(@as(u32, 1) << depth);
     d.thres = @intFromFloat(_thres * scal);
     d.thres_y = @intFromFloat(_threy * scal);
     d.thres_u = @intFromFloat(_threu * scal);
     d.thres_v = @intFromFloat(_threv * scal);
 
-    if (vi.format.colorFamily != c.cfYUV) {
+    if (vi.format.colorFamily != cf.YUV) {
         vsapi.?.mapSetError.?(out, "chromanr: only works with YUV format");
         vsapi.?.freeNode.?(d.node);
         return;
     }
 
-    if (vi.format.sampleType == c.stFloat) {
+    if (vi.format.sampleType == st.Float) {
         vsapi.?.mapSetError.?(out, "chromanr: only works with int format");
         vsapi.?.freeNode.?(d.node);
         return;
@@ -259,17 +263,17 @@ export fn chromanrCreate(in: ?*const c.VSMap, out: ?*c.VSMap, userData: ?*anyopa
     var data: *ChromanrData = allocator.create(ChromanrData) catch unreachable;
     data.* = d;
 
-    var deps = [_]c.VSFilterDependency{
-        c.VSFilterDependency{
+    var deps = [_]vs.FilterDependency{
+        vs.FilterDependency{
             .source = d.node,
-            .requestPattern = c.rpStrictSpatial,
+            .requestPattern = rp.StrictSpatial,
         },
     };
-    vsapi.?.createVideoFilter.?(out, "chromanr", vi, chromanrGetFrame, chromanrFree, c.fmParallel, &deps, 1, data, core);
+    vsapi.?.createVideoFilter.?(out, "chromanr", vi, chromanrGetFrame, chromanrFree, fm.Parallel, &deps, 1, data, core);
 }
 
-export fn VapourSynthPluginInit2(plugin: *c.VSPlugin, vspapi: *const c.VSPLUGINAPI) void {
-    _ = vspapi.configPlugin.?("com.julek.chromanr", "chromanr", "Chroma noise reduction", c.VS_MAKE_VERSION(1, 0), c.VAPOURSYNTH_API_VERSION, 0, plugin);
+export fn VapourSynthPluginInit2(plugin: *vs.Plugin, vspapi: *const vs.PLUGINAPI) void {
+    _ = vspapi.configPlugin.?("com.julek.chromanr", "chromanr", "Chroma noise reduction", vs.makeVersion(1, 0), vs.VAPOURSYNTH_API_VERSION, 0, plugin);
     _ = vspapi.registerFunction.?(
         "CNR",
         "clip:vnode;thres:float:opt;threy:float:opt;threu:float:opt;threv:float:opt;sizew:int:opt;sizeh:int:opt;stepw:int:opt;steph:int:opt;distance:int:opt;",

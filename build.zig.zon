@@ -1,0 +1,11 @@
+.{
+    .name = "chromanr",
+    .version = "1.0.0",
+    .paths = .{""},
+    .dependencies = .{
+        .vapoursynth = .{
+            .url = "https://github.com/dnjulek/vapoursynth-zig/archive/refs/heads/main.tar.gz",
+            .hash = "1220c0d6693bb36620e36486150e357a6606a808fb4735af0d04f902ebfe19a37081",
+        },
+    },
+}
