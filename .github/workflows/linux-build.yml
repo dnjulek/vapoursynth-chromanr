@@ -29,13 +29,8 @@ jobs:
       - name: install zig
         run: sudo snap install zig --classic --edge
 
-      # Runs a set of commands using the runners shell
-      - name: Get VapourSynth include
-        run: |
-          mkdir -p include/vapoursynth
-          wget -P include/vapoursynth https://raw.githubusercontent.com/vapoursynth/vapoursynth/master/include/VapourSynth4.h
-      
+      # Runs a set of commands using the runners shell     
       - name: build
         run: |
-          zig build -Doptimize=ReleaseFast -Dvsinclude=include
-          ls
+          zig build -Doptimize=ReleaseFast
+          ls zig-out/lib

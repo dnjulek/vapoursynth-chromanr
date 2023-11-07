@@ -31,13 +31,7 @@ jobs:
         with:
           cache: false
 
-      - name: Get VapourSynth include
-        run: |
-          mkdir include/vapoursynth
-          curl https://raw.githubusercontent.com/vapoursynth/vapoursynth/master/include/VapourSynth4.h -o include/vapoursynth/VapourSynth4.h
-
       - name: build
         run: |
-          zig build -Doptimize=ReleaseFast -Dvsinclude=include
-          cd zig-out\lib
-          ls
+          zig build -Doptimize=ReleaseFast
+          ls zig-out\lib
