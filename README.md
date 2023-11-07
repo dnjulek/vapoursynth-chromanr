@@ -45,7 +45,5 @@ Zig ver >= 0.11.0-dev.4333
 
 ``zig build -Doptimize=ReleaseFast``
 
-If you don't have vapoursynth installed you must provide the include path with ``-Dvsinclude=...``.
-
 ## TODO
 1. float support.
