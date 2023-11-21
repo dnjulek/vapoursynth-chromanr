@@ -31,19 +31,19 @@ const ChromanrData = struct {
 
 export fn chromanrGetFrame(n: c_int, activation_reason: ar, instance_data: ?*anyopaque, frame_data: ?*?*anyopaque, frame_ctx: ?*vs.FrameContext, core: ?*vs.Core, vsapi: ?*const vs.API) callconv(.C) ?*const vs.Frame {
     _ = frame_data;
-    var d: *ChromanrData = @ptrCast(@alignCast(instance_data));
+    const d: *ChromanrData = @ptrCast(@alignCast(instance_data));
 
     if (activation_reason == ar.Initial) {
         vsapi.?.requestFrameFilter.?(n, d.node, frame_ctx);
     } else if (activation_reason == ar.AllFramesReady) {
         const src = vsapi.?.getFrameFilter.?(n, d.node, frame_ctx);
-        var dst = vsapi.?.newVideoFrame.?(vsapi.?.getVideoFrameFormat.?(src), vsapi.?.getFrameWidth.?(src, 0), vsapi.?.getFrameHeight.?(src, 0), src, core);
-        var srcpy: [*]const u8 = vsapi.?.getReadPtr.?(src, 0);
-        var srcpu: [*]const u8 = vsapi.?.getReadPtr.?(src, 1);
-        var srcpv: [*]const u8 = vsapi.?.getReadPtr.?(src, 2);
+        const dst = vsapi.?.newVideoFrame.?(vsapi.?.getVideoFrameFormat.?(src), vsapi.?.getFrameWidth.?(src, 0), vsapi.?.getFrameHeight.?(src, 0), src, core);
+        const srcpy: [*]const u8 = vsapi.?.getReadPtr.?(src, 0);
+        const srcpu: [*]const u8 = vsapi.?.getReadPtr.?(src, 1);
+        const srcpv: [*]const u8 = vsapi.?.getReadPtr.?(src, 2);
         var dstpy: [*]u8 = vsapi.?.getWritePtr.?(dst, 0);
-        var dstpu: [*]u8 = vsapi.?.getWritePtr.?(dst, 1);
-        var dstpv: [*]u8 = vsapi.?.getWritePtr.?(dst, 2);
+        const dstpu: [*]u8 = vsapi.?.getWritePtr.?(dst, 1);
+        const dstpv: [*]u8 = vsapi.?.getWritePtr.?(dst, 2);
         const stridey: usize = @intCast(vsapi.?.getStride.?(src, 0));
         const strideu: usize = @intCast(vsapi.?.getStride.?(src, 1));
         const stridev: usize = @intCast(vsapi.?.getStride.?(src, 2));
@@ -125,7 +125,7 @@ export fn chromanrGetFrame(n: c_int, activation_reason: ar, instance_data: ?*any
 
 export fn chromanrFree(instance_data: ?*anyopaque, core: ?*vs.Core, vsapi: ?*const vs.API) callconv(.C) void {
     _ = core;
-    var d: *ChromanrData = @ptrCast(@alignCast(instance_data));
+    const d: *ChromanrData = @ptrCast(@alignCast(instance_data));
     vsapi.?.freeNode.?(d.node);
     allocator.destroy(d);
 }
@@ -196,7 +196,7 @@ export fn chromanrCreate(in: ?*const vs.Map, out: ?*vs.Map, user_data: ?*anyopaq
         d.steph = math.lossyCast(usize, _steph);
     }
 
-    var distance = vsapi.?.mapGetInt.?(in, "distance", 0, &err);
+    const distance = vsapi.?.mapGetInt.?(in, "distance", 0, &err);
     d.use_euclidean = (distance == 1);
     if (err != 0) {
         d.use_euclidean = false;
@@ -260,7 +260,7 @@ export fn chromanrCreate(in: ?*const vs.Map, out: ?*vs.Map, user_data: ?*anyopaq
         return;
     }
 
-    var data: *ChromanrData = allocator.create(ChromanrData) catch unreachable;
+    const data: *ChromanrData = allocator.create(ChromanrData) catch unreachable;
     data.* = d;
 
     var deps = [_]vs.FilterDependency{
@@ -269,7 +269,8 @@ export fn chromanrCreate(in: ?*const vs.Map, out: ?*vs.Map, user_data: ?*anyopaq
             .requestPattern = rp.StrictSpatial,
         },
     };
-    vsapi.?.createVideoFilter.?(out, "chromanr", vi, chromanrGetFrame, chromanrFree, fm.Parallel, &deps, 1, data, core);
+
+    vsapi.?.createVideoFilter.?(out, "chromanr", vi, chromanrGetFrame, chromanrFree, fm.Parallel, &deps, deps.len, data, core);
 }
 
 export fn VapourSynthPluginInit2(plugin: *vs.Plugin, vspapi: *const vs.PLUGINAPI) void {

@@ -35,9 +35,9 @@ pub inline fn process(
     var y: usize = 0;
 
     while (y < h) : (y += 1) {
-        var in_yptr: [*]const T = @ptrCast(@alignCast(srcpy + ((stridey * y) << cssh)));
-        var in_uptr: [*]const T = @ptrCast(@alignCast(srcpu + strideu * y));
-        var in_vptr: [*]const T = @ptrCast(@alignCast(srcpv + stridev * y));
+        const in_yptr: [*]const T = @ptrCast(@alignCast(srcpy + ((stridey * y) << cssh)));
+        const in_uptr: [*]const T = @ptrCast(@alignCast(srcpu + strideu * y));
+        const in_vptr: [*]const T = @ptrCast(@alignCast(srcpv + stridev * y));
         const yystart: usize = y -| sizeh;
         const yystop: usize = @min(h - 1, y + sizeh);
         x = 0;
@@ -54,9 +54,9 @@ pub inline fn process(
             var yy = yystart;
 
             while (yy <= yystop) : (yy += steph) {
-                var in_yptr2: [*]const T = @ptrCast(@alignCast(srcpy + ((stridey * yy) << cssh)));
-                var in_uptr2: [*]const T = @ptrCast(@alignCast(srcpu + strideu * yy));
-                var in_vptr2: [*]const T = @ptrCast(@alignCast(srcpv + stridev * yy));
+                const in_yptr2: [*]const T = @ptrCast(@alignCast(srcpy + ((stridey * yy) << cssh)));
+                const in_uptr2: [*]const T = @ptrCast(@alignCast(srcpu + strideu * yy));
+                const in_vptr2: [*]const T = @ptrCast(@alignCast(srcpv + stridev * yy));
 
                 var xx = xxstart;
                 while (xx <= xxstop) : (xx += stepw) {
