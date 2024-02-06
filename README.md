@@ -41,7 +41,7 @@ chromanr.CNR(vnode clip[, float thres=4, float threy=20, float threu=20, float t
     0 (manhattan): Absolute difference.\
     1 (euclidean): Difference squared.
 ## Building
-Zig ver >= 0.11.0-dev.4333
+Zig ver >= zig-0.12.0-dev.2158
 
 ``zig build -Doptimize=ReleaseFast``
 
